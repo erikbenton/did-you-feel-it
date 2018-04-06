@@ -68,6 +68,12 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected Event doInBackground(String... urls)
         {
+            // Do null chck on the input
+            if(urls.length < 1 || urls[0] == null)
+            {
+                return null;
+            }
+
             Event earthquake = Utils.fetchEarthquakeData(urls[0]);
 
             // Return the {@link Event} object as the result fo the {@link TsunamiAsyncTask}
@@ -82,6 +88,12 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Event earthquake)
         {
+            // Null check
+            if(earthquake == null)
+            {
+                return;
+            }
+
             // Update the information displayed to the user.
             updateUi(earthquake);
         }
