@@ -15,9 +15,14 @@
  */
 package com.example.android.didyoufeelit;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.TextView;
+
+import java.io.IOException;
+import java.net.URL;
 
 /**
  * Displays the perceived strength of a single earthquake event based on responses from people who
@@ -34,11 +39,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Perform the HTTP request for earthquake data and process the response.
-        Event earthquake = Utils.fetchEarthquakeData(USGS_REQUEST_URL);
-
-        // Update the information displayed to the user.
-        updateUi(earthquake);
+        // Kick off an {@link AsyncTask} to perform the network request
+        EarthquakeAsyncTask task = new EarthquakeAsyncTask();
+        task.execute(USGS_REQUEST_URL);
     }
 
     /**
@@ -53,5 +56,34 @@ public class MainActivity extends AppCompatActivity {
 
         TextView magnitudeTextView = (TextView) findViewById(R.id.perceived_magnitude);
         magnitudeTextView.setText(earthquake.perceivedStrength);
+    }
+
+    private class EarthquakeAsyncTask extends AsyncTask<String, Void, Event>
+    {
+        /**
+         * This method is invoked when the async task is executed
+         * @param urls - URL string where the data is requested
+         * @return earthquake - Event data
+         */
+        @Override
+        protected Event doInBackground(String... urls)
+        {
+            Event earthquake = Utils.fetchEarthquakeData(urls[0]);
+
+            // Return the {@link Event} object as the result fo the {@link TsunamiAsyncTask}
+            return earthquake;
+        }
+
+        /**
+         * This method is invoked after the doInBackground method is finished.
+         * This is responsible for updating the UI after the Even data is received
+         * @param earthquake
+         */
+        @Override
+        protected void onPostExecute(Event earthquake)
+        {
+            // Update the information displayed to the user.
+            updateUi(earthquake);
+        }
     }
 }
